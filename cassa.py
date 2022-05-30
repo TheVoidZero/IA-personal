@@ -11,7 +11,7 @@ engine.setProperty('voice', voices[0].id)
 def talk(text):
     engine.say(text)
     engine.runAndWait()
-
+#esto hara que sea posible que te esuche
 def listen():
     try:
         with sr.Microphone() as source:
@@ -24,7 +24,7 @@ def listen():
     except:
         pass
     return rec
-
+#reproducira lo que se menciona
 def run_cas():
     rec=listen()
     if 'reproduce' in rec:
