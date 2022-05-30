@@ -4,6 +4,7 @@ name = "dinero"
 listener = sr.Recognizer()
 engine = pyttsx3.init()
 
+#Voz escogida para el asistente
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id)
 
