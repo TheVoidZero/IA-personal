@@ -3,7 +3,7 @@ import subprocess as sub
 import pyttsx3, pywhatkit, wikipedia, datetime, keyboard, colors, os
 from pygame import mixer
 
-name = "dinero"
+name = "liz"
 listener = sr.Recognizer()
 engine = pyttsx3.init()
 
