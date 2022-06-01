@@ -1,6 +1,6 @@
 import speech_recognition as sr
 import subprocess as sub 
-import pyttsx3, pywhatkit, wikipedia, datetime, keyboard, colors, os
+import pyttsx3, pywhatkit, wikipedia, datetime, keyboard, colors, os, musica
 from pygame import mixer
 
 name = "liz"
@@ -11,6 +11,21 @@ engine = pyttsx3.init()
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id)
 engine.setProperty('rate',145)
+
+sites = {
+    'google': 'https://www.google.com.mx/',
+    'youtube' : 'https://www.youtube.com/',
+    'facebook' : 'https://www.facebook.com/',
+    'whatsapp' : 'https://web.whatsapp.com/',
+    'tu manga' : 'https://lectortmo.com/',
+}
+
+files = {
+    'carta' : 'Carta pasantia-Aldo Hernadnez.pdf',
+    'cedula' : 'Cedula y papeleta-aldo hernandez.docx',
+    'foto' : 'aldo.jpg'
+
+}
 
 def talk(text):
     engine.say(text)
@@ -62,6 +77,32 @@ def run_cas():
         elif 'colores' in rec:
             talk("Espere un momento")
             colors.capture()
+        elif 'abre' in rec:
+            for site in sites:
+                if site in rec:
+                    sub.call(f'start {sites[site]}', shell=True)
+                    talk(f'Abriendo {site}')
+        elif 'archivo' in rec:
+            for file in files: 
+                if file in rec:
+                    sub.Popen([files[file]], shell=True)
+                    talk(f'Abriendo {file}')
+        elif 'escribe' in rec:
+            try:
+                with open("nota.txt", 'a') as f:
+                    write(f)
+            except FileNotFoundError as e:
+                file= open("nota.txt", 'w')
+                write(file)
+
+def write(f):
+    talk("Que quieres que escriba?")
+    rec_write = listen()
+    f.write(rec_write + os.linesep)
+    f.close()
+    talk("Listo, puedes revisarlo")
+    sub.Popen("nota.txt", shell=True)
+
 #correra la funcion
 if __name__== '__main__':
     run_cas()
