@@ -1,7 +1,8 @@
 import speech_recognition as sr
 import subprocess as sub 
-import pyttsx3, pywhatkit, wikipedia, datetime, keyboard, colors, os, musica
+import pyttsx3, pywhatkit, wikipedia, datetime, keyboard, colors, os
 from pygame import mixer
+
 
 name = "liz"
 listener = sr.Recognizer()
@@ -27,11 +28,16 @@ files = {
 
 }
 
+programas = {
+    'steam': r'D:\Steam\steam.exe' #la r nos indica que lo ocuparemos como un solo string por el \
+
+}
 def talk(text):
     engine.say(text)
     engine.runAndWait()
 #esto hara que sea posible que te esuche
 def listen():
+    
     try:
         with sr.Microphone() as source:
             print("Escuchando...")
@@ -46,7 +52,11 @@ def listen():
 #reproducira lo que se menciona si
 def run_cas():
     while True:
-        rec=listen()
+        try:
+            rec=listen()
+        except:
+            print("Podrias repetirlo?")
+            continue
         if 'reproduce' in rec:
             music = rec.replace('reproduce','')
             print("Reproduciendo " + music)
@@ -82,6 +92,10 @@ def run_cas():
                 if site in rec:
                     sub.call(f'start {sites[site]}', shell=True)
                     talk(f'Abriendo {site}')
+            for app in programas:
+                if app in rec:
+                    talk(f'Abriendo {app}')
+                    os.startfile(programas[app])
         elif 'archivo' in rec:
             for file in files: 
                 if file in rec:
