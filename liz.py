@@ -50,7 +50,7 @@ def listen():
         pass
     return rec
 #reproducira lo que se menciona si
-def run_cas():
+def run_liz():
     while True:
         try:
             rec=listen()
@@ -119,4 +119,4 @@ def write(f):
 
 #correra la funcion
 if __name__== '__main__':
-    run_cas()
+    run_liz()

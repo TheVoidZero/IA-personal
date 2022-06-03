@@ -27,6 +27,17 @@ label_tittle.pack(pady=10)
 liz_photo=ImageTk.PhotoImage(Image.open("cc.jpg"))
 window_photo= Label(main_window, image=liz_photo)
 window_photo.pack(pady=5)
+def mexican_voice():
+    change_voice(0)
+def spanish_voice():
+    change_voice(3)
+def german_voice():
+    change_voice(4)
+def change_voice(id):
+    engine.setProperty('voice', voices[id].id)
+    engine.setProperty('rate', 145)
+    talk("Hola soy liz")
+
 
 
 name = "liz"
@@ -81,7 +92,7 @@ def listen():
 # reproducira lo que se menciona si
 
 
-def run_cas():
+def run_liz():
     while True:
         try:
             rec = listen()
@@ -148,5 +159,13 @@ def write(f):
     f.close()
     talk("Listo, puedes revisarlo")
     sub.Popen("nota.txt", shell=True)
+
+button_voice_mx=Button(main_window, text="Voz mexicana", fg="white", bg="#348F50", font=("Arial",10,"bold"),command=mexican_voice)
+button_voice_mx.place(x=625,y=90,width=100,height=30)
+button_voice_es=Button(main_window, text="Voz española", fg="white", bg="#b92b27", font=("Arial",10,"bold"),command=spanish_voice)
+button_voice_es.place(x=625,y=130,width=100,height=30)
+button_voice_al=Button(main_window, text="Voz alemana", fg="white", bg="#f4791f", font=("Arial",10,"bold"),command=german_voice)
+button_voice_al.place(x=625,y=170,width=100,height=30)
+
 
 main_window.mainloop()
