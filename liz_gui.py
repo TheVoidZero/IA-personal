@@ -19,11 +19,24 @@ main_window.geometry("800x600")
 main_window.resizable(0,0)
 main_window.configure(bg='#302b63')
 
+comandos = """
+    Comandos que puedes utilizar:
+    -Reproduce...(cancion)
+    -Busca... (algo)
+    -Alarma...(hora en 24H)
+    -Archivo...(nombre)
+    -Colores (rojo,azul,amarillo)
+    -Detener
+"""
+
 
 label_tittle = Label(main_window, text="Liz AV", bg="#6f0000", fg="#243B55",font=('Arial',"27", 'bold'))
 
 label_tittle.pack(pady=10)
 
+canvas_comandos=Canvas(bg="#654ea3", height=200,width=195)
+canvas_comandos.place(x=0,y=0)
+canvas_comandos.create_text(90,80,text=comandos,fill="white",font='Arial 10')
 liz_photo=ImageTk.PhotoImage(Image.open("cc.jpg"))
 window_photo= Label(main_window, image=liz_photo)
 window_photo.pack(pady=5)
@@ -80,7 +93,7 @@ def listen():
 
     try:
         with sr.Microphone() as source:
-            print("Escuchando...")
+            talk("Cual es su orden zero")
             pc = listener.listen(source)
             rec = listener.recognize_google(pc, language="es")
             rec = rec.lower()
@@ -166,6 +179,9 @@ button_voice_es=Button(main_window, text="Voz española", fg="white", bg="#b92b2
 button_voice_es.place(x=625,y=130,width=100,height=30)
 button_voice_al=Button(main_window, text="Voz alemana", fg="white", bg="#f4791f", font=("Arial",10,"bold"),command=german_voice)
 button_voice_al.place(x=625,y=170,width=100,height=30)
+button_listen=Button(main_window, text="Escuchar", fg="white", bg="#c31432", font=("Arial",10,"bold"),width=10,height=4,command=run_liz)
+button_listen.pack(pady=10)
+
 
 
 main_window.mainloop()
