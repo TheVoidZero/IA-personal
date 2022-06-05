@@ -37,9 +37,17 @@ label_tittle.pack(pady=10)
 canvas_comandos=Canvas(bg="#654ea3", height=200,width=195)
 canvas_comandos.place(x=0,y=0)
 canvas_comandos.create_text(90,80,text=comandos,fill="white",font='Arial 10')
-liz_photo=ImageTk.PhotoImage(Image.open("cc.jpg"))
-window_photo= Label(main_window, image=liz_photo)
-window_photo.pack(pady=5)
+
+text_info = Text(main_window, bg="#654ea3", fg="white")
+text_info.place(x=0, y=200,height=430,width=200)
+
+
+
+liz_photo=ImageTk.PhotoImage(Image.open("cc.jpg"))#abrimos la imagen que ocuparemos
+window_photo= Label(main_window, image=liz_photo)#diremos donde se pondra la imagen
+window_photo.pack(pady=5)#ubciaremos la iamgen
+
+
 def mexican_voice():
     change_voice(0)
 def spanish_voice():
@@ -86,56 +94,71 @@ programas = {
 def talk(text):
     engine.say(text)
     engine.runAndWait()
-# esto hara que sea posible que te esuche
 
+def read_and_talk():
+    text=text_info.get("1.0","end")
+    talk(text)
+
+def write_text(text_wiki):
+    text_info.insert(INSERT,text_wiki)
 
 def listen():
+    listener = sr.Recognizer()     
+    with sr.Microphone() as source:
+        print("Escuchando...")
+        listener.adjust_for_ambient_noise(source)
+        pc = listener.listen(source)
 
     try:
-        with sr.Microphone() as source:
-            talk("Cual es su orden zero")
-            pc = listener.listen(source)
-            rec = listener.recognize_google(pc, language="es")
-            rec = rec.lower()
-            if name in rec:
-                rec = rec.replace(name, '')
-    except:
-        pass
+        rec = listener.recognize_google(pc, language="es")
+        rec = rec.lower()
+    except sr.UnknownValueError:
+        print("No te entendí, intenta de nuevo")
+        if name in rec:
+            rec = rec.replace(name, '')
     return rec
 # reproducira lo que se menciona si
-
+def clock(rec):
+    hora = rec.replace('alarma', '')
+    hora = hora.strip()
+    talk("Alarma activada a las " + hora + " horas")
+    if hora[0] != '0' and len(hora)<5:
+        hora = '0' + hora
+    print(hora)
+    while True:
+        if datetime.datetime.now().strftime('%H:%M') == hora:
+            print("Despierta")
+            mixer.init()
+            mixer.music.load("despierta.mp3")
+            mixer.music.play()
+        else:
+            continue
+        if keyboard.read_key() == "S":
+            mixer.music.stop()
+            break
 
 def run_liz():
     while True:
         try:
             rec = listen()
-        except:
-            print("Podrias repetirlo?")
-            continue
+        except UnboundLocalError:
+            print("No te entendí, intenta de nuevo")
+            continue   
         if 'reproduce' in rec:
             music = rec.replace('reproduce', '')
             print("Reproduciendo " + music)
             talk("Reproduciendo " + music)
             pywhatkit.playonyt(music)
-        elif 'busca' in rec:
+        elif 'busca' in rec: #hallar solucion
             search = rec.replace('busca', '')
             wikipedia.set_lang("es")
             wiki = wikipedia.summary(search, 2)
-            print(search + ": " + wiki)
+            write_text(search + ": " + wiki)
             talk(wiki)
+            break
         elif 'alarma' in rec:
-            hora = rec.replace('alarma', '')
-            hora = hora.strip()
-            talk("Alarma activada a las " + hora + " horas")
-            while True:
-                if datetime.datetime.now().strftime('%H:%M') == hora:
-                    print("Despierta")
-                    mixer.init()
-                    mixer.music.load("despierta.mp3")
-                    mixer.music.play()
-                    if keyboard.read_key() == "S":
-                        mixer.music.stop()
-                        break
+            t = tr.Thread(target=clock, args=(rec,))
+            t.start()
         elif 'detener' in rec:
             talk("Nos vemos manco culiao")
             break
@@ -181,6 +204,8 @@ button_voice_al=Button(main_window, text="Voz alemana", fg="white", bg="#f4791f"
 button_voice_al.place(x=625,y=170,width=100,height=30)
 button_listen=Button(main_window, text="Escuchar", fg="white", bg="#c31432", font=("Arial",10,"bold"),width=10,height=4,command=run_liz)
 button_listen.pack(pady=10)
+button_speak=Button(main_window, text="Hablar", fg="white", bg="#654ea3", font=("Arial",10,"bold"),width=10,height=4,command=read_and_talk)
+button_speak.place(x=625,y=210,width=100,height=30)
 
 
 
