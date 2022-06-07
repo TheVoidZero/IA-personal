@@ -29,16 +29,16 @@ comandos = """
     -Detener
 """
 
-
+#ventana del asistente
 label_tittle = Label(main_window, text="Liz AV", bg="#6f0000", fg="#243B55",font=('Arial',"27", 'bold'))
-
+#se ubicara enmedio
 label_tittle.pack(pady=10)
-
+#se pondra el apartado donde se muestra los comandos
 canvas_comandos=Canvas(bg="#654ea3", height=200,width=195)
 canvas_comandos.place(x=0,y=0)
 canvas_comandos.create_text(90,80,text=comandos,fill="white",font='Arial 10')
 
-
+#ventana donde se escribira
 text_info = Text(main_window,bg="#654ea3",fg="white")
 text_info.place(x=0,y=200,height=200,width=195)
 
@@ -51,7 +51,7 @@ liz_photo=ImageTk.PhotoImage(Image.open("cc.jpg"))#abrimos la imagen que ocupare
 window_photo= Label(main_window, image=liz_photo)#diremos donde se pondra la imagen
 window_photo.pack(pady=5)#ubciaremos la iamgen
 
-
+#dependiendo de las voces que tengas en tu computadora
 def mexican_voice():
     change_voice(0)
 def spanish_voice():
@@ -74,14 +74,27 @@ voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id)
 engine.setProperty('rate', 145)
 
+def charge_data(name_dict,name_file):
+    try:
+        with open(name_file) as f:
+            for line in f:
+                (key,val)=line.split(",")
+                val = val.rstrip("\n")
+                name_dict[key]=val
+    except FileNotFoundError as e:
+        pass
+
 
 sites = dict()
+charge_data(sites, "Pages.txt")
 
 files = dict()
+charge_data(files, "Archivos.txt")
 
 programas = dict()
+charge_data(programas, "Apps.txt")
 
-
+#guardara lo que digas
 def talk(text):
     engine.say(text)
     engine.runAndWait()
@@ -89,10 +102,10 @@ def talk(text):
 def read_and_talk():
     text=text_info.get("1.0","end")
     talk(text)
-
+#escribira lo que busque en la wiki
 def write_text(text_wiki):
     text_info.insert(INSERT,text_wiki)
-
+#harea que el microfono nos escuche
 def listen():
     listener = sr.Recognizer()     
     with sr.Microphone() as source:
@@ -127,7 +140,7 @@ def clock(rec):
         if keyboard.read_key() == "S":
             mixer.music.stop()
             break
-
+#sucede la magia dependiendo lo que digas ella hara el resto
 def run_liz():
     while True:
         try:
@@ -157,19 +170,28 @@ def run_liz():
             talk("Espere un momento")
             colors.capture()
         elif 'abre' in rec:
-            for site in sites:
-                if site in rec:
-                    sub.call(f'start {sites[site]}', shell=True)
-                    talk(f'Abriendo {site}')
-            for app in programas:
-                if app in rec:
-                    talk(f'Abriendo {app}')
-                    os.startfile(programas[app])
+            task=rec.replace('abre', '').strip()
+            if task in sites:
+                for task in sites:
+                    if task in rec:
+                        sub.call(f'start {sites[task]}', shell=True)
+                        talk(f'Abriendo {task}')
+            elif task in sites:
+                for task in programas:
+                    if task in rec:
+                        talk(f'Abriendo {task}')
+                        os.startfile(programas[task])
+            else:
+                talk("Lo siento no hay nada con ese nombre, si lo necesita agregalo en el apartado correcto")
         elif 'archivo' in rec:
-            for file in files:
-                if file in rec:
-                    sub.Popen([files[file]], shell=True)
-                    talk(f'Abriendo {file}')
+            file=rec.replace('archivo','').strip()
+            if file in files:
+                for file in files:
+                    if file in rec:
+                        sub.Popen([files[file]], shell=True)
+                        talk(f'Abriendo {file}')
+            else:
+                talk("Lo siento no hay nada con ese nombre, si lo necesita agregalo en el apartado correcto")
         elif 'escribe' in rec:
             try:
                 with open("nota.txt", 'a') as f:
@@ -178,7 +200,7 @@ def run_liz():
                 file = open("nota.txt", 'w')
                 write(file)
 
-
+#escribe en un bloc no de notas
 def write(f):
     talk("Que quieres que escriba?")
     rec_write = listen()
@@ -186,8 +208,9 @@ def write(f):
     f.close()
     talk("Listo, puedes revisarlo")
     sub.Popen("nota.txt", shell=True)
-
+#sirve para añadir aplicaciones, programas y cosas
 def open_files_w():
+    global namefiles_entry,pathf_entry
     window_files=Toplevel()
     window_files.title("Agregar archivos")
     window_files.configure(bg= "#654ea3")
@@ -201,21 +224,22 @@ def open_files_w():
     name_label= Label(window_files, text="Nombre del archivo", bg="#654ea3", fg="white",font=('Arial',"10", 'bold'))
     name_label.pack(pady=2)
 
-    namefile_entry= Entry(window_files)
-    namefile_entry.pack(pady=1)
+    namefiles_entry= Entry(window_files)
+    namefiles_entry.pack(pady=1)
 
     path_label= Label(window_files, text="Ruta del archivo", bg="#654ea3", fg="white",font=('Arial',"10", 'bold'))
     path_label.pack(pady=2)
 
-    path_entry= Entry(window_files,width=35)
-    path_entry.pack(pady=1)
+    pathf_entry= Entry(window_files,width=35)
+    pathf_entry.pack(pady=1)
 
-    save_button= Button(window_files, text="Guardar", bg="#654ea3", fg="white",width=8,height=1)
+    save_button= Button(window_files, text="Guardar", bg="#654ea3", fg="white",width=8,height=1,command=add_files)
     save_button.pack(pady=4)
 
 
 
 def open_apps_w():
+    global nameapps_entry, patha_entry
     window_apps=Toplevel()
     window_apps.title("Agregar apps")
     window_apps.configure(bg= "#654ea3")
@@ -235,14 +259,15 @@ def open_apps_w():
     path_label= Label(window_apps, text="Ruta de la app", bg="#654ea3", fg="white",font=('Arial',"10", 'bold'))
     path_label.pack(pady=2)
 
-    path_entry= Entry(window_apps,width=35)
-    path_entry.pack(pady=1)
+    patha_entry= Entry(window_apps,width=35)
+    patha_entry.pack(pady=1)
 
-    save_button= Button(window_apps, text="Guardar", bg="#654ea3", fg="white",width=8,height=1)
+    save_button= Button(window_apps, text="Guardar", bg="#654ea3", fg="white",width=8,height=1,command=add_apps)
     save_button.pack(pady=4)
 
 
 def open_pages_w():
+    global namepages_entry,pathp_entry
     window_pages=Toplevel()
     window_pages.title("Agregar paginas")
     window_pages.configure(bg= "#654ea3")
@@ -262,11 +287,43 @@ def open_pages_w():
     path_label= Label(window_pages, text="Ruta de la pagina", bg="#654ea3", fg="white",font=('Arial',"10", 'bold'))
     path_label.pack(pady=2)
 
-    path_entry= Entry(window_pages,width=35)
-    path_entry.pack(pady=1)
+    pathp_entry= Entry(window_pages,width=35)
+    pathp_entry.pack(pady=1)
 
-    save_button= Button(window_pages, text="Guardar", bg="#654ea3", fg="white",width=8,height=1)
+    save_button= Button(window_pages, text="Guardar", bg="#654ea3", fg="white",width=8,height=1,command=add_pages)
     save_button.pack(pady=4)
+
+def add_files():
+    name_file = namefiles_entry.get().strip()
+    path_file=pathf_entry.get().strip()
+    files[name_file]=path_file
+    save_data(name_file,path_file, "Archivos.txt")
+    namefile_entry.delete(0,"end")
+    pathf_entry.delete(0,"end")
+def add_apps():
+    name_file = nameapps_entry.get().strip()
+    path_file=patha_entry.get().strip()
+    programas[name_file]=path_file
+    save_data(name_file,path_file, "Apps.txt")
+    nameapps_entry.delete(0,"end")
+    patha_entry.delete(0,"end")
+def add_pages():
+    name_page = namepages_entry.get().strip()
+    url_pages=pathp_entry.get().strip()
+    sites[name_page]=url_pages
+    save_data(name_page,url_pages, "Pages.txt")
+    namepages_entry.delete(0,"end")
+    pathp_entry.delete(0,"end")
+
+def save_data(key,value,file_name):
+    try:
+        with open(file_name, 'a') as f:
+            f.write(key+ "," + value + "\n")
+    except FileNotFoundError as f:
+        file = open(file_name, "a")
+        file.write(key+ "," + value + "\n")
+            
+
 
 
 
