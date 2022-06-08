@@ -93,7 +93,7 @@ charge_data(files, "Archivos.txt")
 
 programas = dict()
 charge_data(programas, "Apps.txt")
-
+###########################################################################################################################
 #guardara lo que digas
 def talk(text):
     engine.say(text)
@@ -119,8 +119,9 @@ def listen():
     except sr.UnknownValueError:
         print("No te entendí, intenta de nuevo")
         if name in rec:
-            rec = rec.replace(name, '')
+              rec = rec.replace(name, '')
     return rec
+###################################################################################################################
 # reproducira lo que se menciona si
 def clock(rec):
     hora = rec.replace('alarma', '')
@@ -140,6 +141,7 @@ def clock(rec):
         if keyboard.read_key() == "S":
             mixer.music.stop()
             break
+#########################################################################################################################################
 #sucede la magia dependiendo lo que digas ella hara el resto
 def run_liz():
     while True:
@@ -199,7 +201,7 @@ def run_liz():
             except FileNotFoundError as e:
                 file = open("nota.txt", 'w')
                 write(file)
-
+####################################################################################################################
 #escribe en un bloc no de notas
 def write(f):
     talk("Que quieres que escriba?")
@@ -208,6 +210,7 @@ def write(f):
     f.close()
     talk("Listo, puedes revisarlo")
     sub.Popen("nota.txt", shell=True)
+    ##################################################################################################################
 #sirve para añadir aplicaciones, programas y cosas
 def open_files_w():
     global namefiles_entry,pathf_entry
@@ -292,7 +295,7 @@ def open_pages_w():
 
     save_button= Button(window_pages, text="Guardar", bg="#654ea3", fg="white",width=8,height=1,command=add_pages)
     save_button.pack(pady=4)
-
+#######################################################################################
 def add_files():
     name_file = namefiles_entry.get().strip()
     path_file=pathf_entry.get().strip()
@@ -323,26 +326,85 @@ def save_data(key,value,file_name):
         file = open(file_name, "a")
         file.write(key+ "," + value + "\n")
             
+######################################################################################################################################
 
+def talk_pages():
+    if bool(sites) == True:
+        talk("Has agregado las siguientes paginas")
+        for site in sites:
+            talk(site)
+    else:
+        talk("No has agregado paginas web") 
+def talk_apps():
+    if bool(programas) == True:
+        talk("Has agregado las siguientes aplicaciones")
+        for app in programas:
+            talk(app)
+    else:
+        talk("No has agregado aplicaciones") 
+def talk_files():
+    if bool(files) == True:
+        talk("Has agregado los siguientes archivos")
+        for file in files:
+            talk(file)
+    else:
+        talk("No has agregado archivos") 
+##################################################################################################################################
+def give_me_name():
+    talk("Hola cual es tu nombre")
+    name=listen()
+    name=name.strip()
+    talk(f"Bienvenido {name}")
 
+    try:
+        with open("Name.txt",'w') as f:
+            f.write(name)
+    except FileNotFoundError:
+        file = open("Name.txt", 'w')
+        file.write(name)
 
+def say_hello():
+        if os.path.exists("Name.txt"):
+            with open("Name.txt") as f:
+                for name in f:
+                    talk(f"Hola bienvenido, {name}")
+        else:
+            give_me_name()
 
+def thread_hello():
+    t=tr.Thread(target=say_hello)
+    t.start()
+
+thread_hello()
+##################################################################################################################################
 button_voice_mx=Button(main_window, text="Voz mexicana", fg="white", bg="#348F50", font=("Arial",10,"bold"),command=mexican_voice)
 button_voice_mx.place(x=625,y=90,width=100,height=30)
 button_voice_es=Button(main_window, text="Voz española", fg="white", bg="#b92b27", font=("Arial",10,"bold"),command=spanish_voice)
 button_voice_es.place(x=625,y=130,width=100,height=30)
 button_voice_al=Button(main_window, text="Voz alemana", fg="white", bg="#f4791f", font=("Arial",10,"bold"),command=german_voice)
 button_voice_al.place(x=625,y=170,width=100,height=30)
+
 button_listen=Button(main_window, text="Escuchar", fg="white", bg="#c31432", font=("Arial",10,"bold"),width=10,height=4,command=run_liz)
-button_listen.pack(pady=10)
+button_listen.pack(side=BOTTOM, pady=10)
+
 button_speak=Button(main_window, text="Hablar", fg="white", bg="#654ea3", font=("Arial",10,"bold"),width=10,height=4,command=read_and_talk)
 button_speak.place(x=625,y=210,width=100,height=30)
+
+
 button_add_files=Button(main_window, text="Agregar archivos", fg="white", bg="#654ea3", font=("Arial",10,"bold"),width=10,height=4,command=open_files_w)
 button_add_files.place(x=615,y=250,width=120,height=30)
 button_add_apps=Button(main_window, text="Agregar aplicaciones", fg="white", bg="#654ea3", font=("Arial",10,"bold"),width=10,height=4,command=open_apps_w)
 button_add_apps.place(x=615,y=290,width=150,height=30)
 button_add_pages=Button(main_window, text="Agregar paginas", fg="white", bg="#654ea3", font=("Arial",10,"bold"),width=10,height=4,command=open_pages_w)
 button_add_pages.place(x=615,y=330,width=120,height=30)
+
+
+button_tell_files=Button(main_window, text="Archivos agregadas", fg="white", bg="#2c3e50", font=("Arial",10,"bold"),width=10,height=4,command=talk_files)
+button_tell_files.place(x=210,y=400,width=130,height=30)
+button_tell_app=Button(main_window, text="Apps agregadas", fg="white", bg="#2c3e50", font=("Arial",10,"bold"),width=10,height=4,command=talk_apps)
+button_tell_app.place(x=500,y=400,width=130,height=30)
+button_tell_pages=Button(main_window, text="Paginas agregadas", fg="white", bg="#2c3e50", font=("Arial",10,"bold"),width=10,height=4,command=talk_pages)
+button_tell_pages.place(x=355,y=400,width=130,height=30)
 
 
 
