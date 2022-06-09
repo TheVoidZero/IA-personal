@@ -109,18 +109,65 @@ def write_text(text_wiki):
 def listen():
     listener = sr.Recognizer()     
     with sr.Microphone() as source:
-        print("Escuchando...")
         listener.adjust_for_ambient_noise(source)
+        talk("Te escucho señor")
         pc = listener.listen(source)
-
     try:
         rec = listener.recognize_google(pc, language="es")
         rec = rec.lower()
     except sr.UnknownValueError:
         print("No te entendí, intenta de nuevo")
-        if name in rec:
-              rec = rec.replace(name, '')
+    except sr.RequestError as e:
+        print("Could not request results from Google Speech Recognition service; {0}".format(e))
     return rec
+###################################################################################################################
+def reproduce(rec):
+    music = rec.replace('reproduce', '')
+    print("Reproduciendo " + music)
+    talk("Reproduciendo " + music)
+    pywhatkit.playonyt(music)
+def busca(rec):
+    search = rec.replace('busca', '')
+    wikipedia.set_lang("es")
+    wiki = wikipedia.summary(search, 2)
+    write_text(search + ": " + wiki)
+    talk(wiki)
+def thread_alarma(rec):
+    t = tr.Thread(target=clock, args=(rec,))
+    t.start()
+def colores(rec):
+    talk("Espere un momento")
+    colors.capture()
+def abre(rec):
+    task=rec.replace('abre', '').strip()
+    if task in sites:
+        for task in sites:
+            if task in rec:
+                sub.call(f'start {sites[task]}', shell=True)
+                talk(f'Abriendo {task}')
+    elif task in sites:
+        for task in programas:
+            if task in rec:
+                talk(f'Abriendo {task}')
+                os.startfile(programas[task])
+    else:
+        talk("Lo siento no hay nada con ese nombre, si lo necesita agregalo en el apartado correcto")
+def archivo(rec):
+    file=rec.replace('archivo','').strip()
+    if file in files:
+        for file in files:
+            if file in rec:
+                sub.Popen([files[file]], shell=True)
+                talk(f'Abriendo {file}')
+    else:
+            talk("Lo siento no hay nada con ese nombre, si lo necesita agregalo en el apartado correcto")
+def escribe(rec):
+    try:
+        with open("nota.txt", 'a') as f:
+            write(f)
+    except FileNotFoundError as e:
+        file = open("nota.txt", 'w')
+        write(file)
 ###################################################################################################################
 # reproducira lo que se menciona si
 def clock(rec):
@@ -142,65 +189,37 @@ def clock(rec):
             mixer.music.stop()
             break
 #########################################################################################################################################
+key_words={
+    'reproduce' : reproduce,
+    'busca' : busca,
+    'alarma' : thread_alarma, 
+    'colores' : colores,
+    'abre' : abre,
+    'archivo' : archivo,
+    'escribe' : escribe
+}
+#########################################################################################################################################
 #sucede la magia dependiendo lo que digas ella hara el resto
 def run_liz():
     while True:
         try:
             rec = listen()
         except UnboundLocalError:
-            print("No te entendí, intenta de nuevo")
-            continue   
-        if 'reproduce' in rec:
-            music = rec.replace('reproduce', '')
-            print("Reproduciendo " + music)
-            talk("Reproduciendo " + music)
-            pywhatkit.playonyt(music)
-        elif 'busca' in rec: #hallar solucion
-            search = rec.replace('busca', '')
-            wikipedia.set_lang("es")
-            wiki = wikipedia.summary(search, 2)
-            write_text(search + ": " + wiki)
-            talk(wiki)
+            talk("No te entendi, intetna de nuevo")
+            continue
+        rec = listen()
+        if 'busca' in rec:
+            key_words['busca'](rec)
             break
-        elif 'alarma' in rec:
-            t = tr.Thread(target=clock, args=(rec,))
-            t.start()
-        elif 'detener' in rec:
+        else:
+            for word in key_words:
+                if word in rec:
+                    key_words[word](rec)
+        if 'detener' in rec:
             talk("Nos vemos manco culiao")
             break
-        elif 'colores' in rec:
-            talk("Espere un momento")
-            colors.capture()
-        elif 'abre' in rec:
-            task=rec.replace('abre', '').strip()
-            if task in sites:
-                for task in sites:
-                    if task in rec:
-                        sub.call(f'start {sites[task]}', shell=True)
-                        talk(f'Abriendo {task}')
-            elif task in sites:
-                for task in programas:
-                    if task in rec:
-                        talk(f'Abriendo {task}')
-                        os.startfile(programas[task])
-            else:
-                talk("Lo siento no hay nada con ese nombre, si lo necesita agregalo en el apartado correcto")
-        elif 'archivo' in rec:
-            file=rec.replace('archivo','').strip()
-            if file in files:
-                for file in files:
-                    if file in rec:
-                        sub.Popen([files[file]], shell=True)
-                        talk(f'Abriendo {file}')
-            else:
-                talk("Lo siento no hay nada con ese nombre, si lo necesita agregalo en el apartado correcto")
-        elif 'escribe' in rec:
-            try:
-                with open("nota.txt", 'a') as f:
-                    write(f)
-            except FileNotFoundError as e:
-                file = open("nota.txt", 'w')
-                write(file)
+    main_window.update()
+        
 ####################################################################################################################
 #escribe en un bloc no de notas
 def write(f):
