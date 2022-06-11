@@ -147,9 +147,9 @@ def abre(rec):
     if task in sites:
         for task in sites:
             if task in rec:
-                sub.call(f'start {sites[task]}', shell=True)
+                sub.call(f'start chrome.exe {sites[task]}', shell=True)
                 talk(f'Abriendo {task}')
-    elif task in sites:
+    elif task in programas:
         for task in programas:
             if task in rec:
                 talk(f'Abriendo {task}')
@@ -186,6 +186,20 @@ def enviar_mensaje(rec):
                 whapp.send_message(contact,message)
     else:
         talk("No has agregado ningun contacto")
+def cierra(rec):
+    for task in programas:
+        kill_task = programas[task].split('\\')
+        kill_task = kill_task[-1]
+        if task in rec:
+            sub.call(f'taskkill /IM {kill_task} /F', shell=True)
+            talk(f'Cerrando {task}')
+        if 'todo' in rec:
+            sub.call(f'taskkill /IM {kill_task} /F', shell=True)
+            talk(f'Cerrando {task}')
+    if 'cierrate' in rec:
+        sub.call(f'taskkill /IM python.exe /F', shell=True)
+        talk('Adios')
+            
 ###################################################################################################################
 # reproducira lo que se menciona si
 def clock(rec):
@@ -215,7 +229,9 @@ key_words={
     'abre' : abre,
     'archivo' : archivo,
     'escribe' : escribe,
-    'mensaje' : enviar_mensaje
+    'mensaje' : enviar_mensaje,
+    'apaga' : cierra,
+    'cierrate' : cierra
 }
 #########################################################################################################################################
 #sucede la magia dependiendo lo que digas ella hara el resto
