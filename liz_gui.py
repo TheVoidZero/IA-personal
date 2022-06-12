@@ -13,6 +13,7 @@ import threading as tr
 from tkinter import *
 from PIL import Image, ImageTk
 import whatsapp as whapp
+import browser as bro
 
 main_window = Tk()
 main_window.title("Liz AV")
@@ -199,7 +200,10 @@ def cierra(rec):
     if 'cierrate' in rec:
         sub.call(f'taskkill /IM python.exe /F', shell=True)
         talk('Adios')
-            
+def vamos(rec):
+    something = rec.replace('vamos','').strip()
+    talk("Buscando" + something)
+    bro.buscador(something) 
 ###################################################################################################################
 # reproducira lo que se menciona si
 def clock(rec):
@@ -231,7 +235,8 @@ key_words={
     'escribe' : escribe,
     'mensaje' : enviar_mensaje,
     'apaga' : cierra,
-    'cierrate' : cierra
+    'cierrate' : cierra,
+    'vamos' : vamos
 }
 #########################################################################################################################################
 #sucede la magia dependiendo lo que digas ella hara el resto
